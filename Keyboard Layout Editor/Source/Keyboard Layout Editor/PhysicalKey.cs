@@ -13,6 +13,8 @@ namespace Keyboard_Layout_Editor {
         public bool IsExtended = false;
         public string FriendlyName = "";
 
+		public byte DeviceCode = 0x00;
+
         public byte[] Values = new byte[256];
         public bool[] IsNonPrintable = new bool[256];
 

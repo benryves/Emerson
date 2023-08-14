@@ -431,7 +431,7 @@
   <key friendlyname="F9" scancode="1" isextended="False" ismodifier="False" modifiermask="0">
     <value modifier="0" value="8" isnonprintable="True" />
   </key>
-  <key friendlyname="Alt" scancode="17" isextended="False" ismodifier="False" modifiermask="0">
+  <key friendlyname="Alt" scancode="17" isextended="False" ismodifier="True" modifierindex="1" istoggle="False">
     <value modifier="0" value="24" isnonprintable="True" />
   </key>
   <key friendlyname="F10" scancode="9" isextended="False" ismodifier="False" modifiermask="0">
