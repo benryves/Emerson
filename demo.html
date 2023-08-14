@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Emerson Demo</title>
+    <style type="text/css">
+        body {
+            max-width: 500px;
+            text-align: justify;
+            font-family: garamond;
+            font-size: 12pt;
+            line-height: 150%;
+        }
+        tt, *.fixed {
+            font-family: consolas, ludica console, monospace;
+        }
+        *.invert {
+            background-color: black;
+            color: white;
+        }
+        
+        
+        div.menu {
+            width: 12em;
+            min-height: 8em;
+            background-color: #CCE0CF;
+            padding: 3px;
+            border: 2px solid black;
+            font-family: consolas, ludica console, monospace;
+            list-style-position: inside;
+        }
+        div.menu ol, div.menu ol li {
+            margin: 0px;
+            padding: 0px;
+			list-style-position: inside;
+        }
+        div.menu li a {
+            color: black;
+            text-decoration: none;
+        }
+        div.menu span {
+            color: #CCE0CF;
+            background-color: black;
+        }
+
+        span.key {
+            color: white;
+            border-style: solid;
+            border-width: 2px;
+            border-color: #DDD #333 black #CCC;
+            background-color: #555;
+            font-family: consolas, lucida console, monospace;
+            font-size: 9pt;
+            font-weight: bold;
+            padding: 0px 2px;
+        }
+        span.green {
+            border-color: #0FC #096 #063 #0EC;
+            background-color: #0C9;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        Emerson Demo</h1>
+    <p>Included is a simple sample program that can be used to demonstrate the capabilities of the Emerson library, from the simplest AT byte transfer protocol to handling scancode translation on a keyboard and the scrollwheel on a mouse.</p>
+    <p>The structure of the demonstration is a series of menus similar to the TIOS menus, which you should find easy enough to navigate.</p>
+    
+    <h1>Main Menu</h1>
+    <div class="menu">
+        <span>EMERSON</span>
+        <ol>
+            <li><a href="#console">Console</a></li>
+            <li><a href="#device">Device</a></li>
+            <li><a href="#keyboard">Keyboard&hellip;</a></li>
+            <li><a href="#mouse">Mouse&hellip;</a></li>            
+            <li>Quit</li>
+        </ol>
+    </div>
+    
+    <a id="#console"></a>
+    <h2>Console</h2>
+    <p>This is the simplest possible part of the library. You can type in bytes (in hexadecimal notation) which are sent to the connected device. Any bytes received will be displayed on the screen along with your input.</p>
+    <p>To send a byte, just press the 0-9 keys or the A-F keys. You do not need to press the <span class="key green">Alpha</span> modifier at any point. To quit, press <span class="key">Clear</span>. You will need to have pressed two keys to send a byte.</p>
+    <p>Bytes you send are displayed in inverted text (white on black). If the byte is not sent successfully, <tt>??</tt> is displayed instead. Received bytes are displayed in normal (black on white) text. You can clear the display by pressing <span class="key">Del</span>.</p>
+    
+    <p>Examples:</p>
+    <ul>
+        <li>Type in <tt class="invert">FF</tt>. This is the reset code, and the connected device shall respond with an acknowledgement (<tt>FA</tt>) then reset itself.</li>
+        <li>With a mouse connected, type in <tt class="invert">F4</tt>. It will acknowledge then send the current position delta and status bytes. As it is in stream mode (unless you changed that previously!), every time you move the mouse it will send updated information.</li>
+        <li>To test whether the mouse is an Intellimouse, you need to set the sample rate to three different values (200, 100 then 80) then check the ID of the device. A standard mouse will respond with the usual <tt>00</tt>, an Intellimouse will report <tt>03</tt> instead. Type in <tt class="invert"> F3C8F364F350F2</tt>. The mouse will acknowledge every byte you type with <tt>FA</tt> - it's the last value we're interested in.</li>
+        <li>With a keyboard connected, type in <tt class="invert">ED</tt> (it'll acknowledge) then <tt class="invert">07</tt>. This is to set keyboard LEDs - the three least significant bits map to the 3 LEDs on the keyboard, hence <tt>07</tt> switches them all on.</li>
+    </ul>
+    
+    <a id="device"></a>
+    <h2>Device</h2>
+    <p>This tries to connect to a device and determine what it is. It will display one of the following device types:</p>
+    <ul>
+    	<li>Keyboard</li>
+    	<li>Standard Mouse</li>
+    	<li>Intellimouse</li>
+    </ul>
+        
+    <a id="keyboard"></a>
+    <h2>Keyboard</h2>
+    <div class="menu">
+        <span>KEYBOARD</span>
+        <ol>
+            <li><a href="#keyboard_scancodes">Scancodes</a></li>
+            <li><a href="#keyboard_text_input">Text Input</a></li>
+            <li>Back</li>
+        </ol>
+    </div>
+        
+    <a id="keyboard_scancodes"></a>
+    <h3>Scancodes</h3>
+    <p>This demonstration prints the results of the <tt>Keyboard.GetScancode</tt> routine. Each time a scancode is received by the calculator, a row of information is displayed:</p>
+    <ul>
+        <li><b>Press or release status</b> - <tt>&darr;</tt> for pressed, <tt>&uarr;</tt> for released.</li>
+        <li><b>Extended status</b> - Extended keys have an asterisk (<tt>*</tt>) by them.</li>
+        <li><b>Scancode</b> - in hexadecimal notation.</li>
+        <li><b>Scancode</b> - in decimal notation.</li>
+    </ul>
+
+
+    <a id="keyboard_text_input"></a>
+    <h3>Text Input</h3>
+    <p>This demonstration lets you type away on your keyboard and see the results on-screen. You <i>must</i> have a keyboard layout definition file installed on the calculator.</p>
+    <p>The demonstration is not very fully-featured, only providing the most basic text editing functionality. It doesn't keep track of entered characters, just displays them as you type. Hence the functionality of some keys (Delete, Backspace, Tab and so on) are simulated in a slightly odd way.</p>
+    <p>It works by calling the <tt>Keyboard.GetKey</tt> routine. This routine:</p>
+    <ul>
+        <li>Tries to get a scancode from the keyboard. If there isn't one waiting, it returns no key.</li>
+        <li>Looks up the key on the layout definition file. If it's not identified, it returns no key.</li>
+        <li>Checks to see if the key is a modifier - if so, it updates the internal status and keyboard LEDs as required.</li>
+        <li>Works out the code for the key that has been pressed based on which key was pressed and the current status. If the key doesn't generate a code, it returns no key.</li>
+        <li>Checks to see if the returned code is a printable key or not, and returns that and the key value.</li>
+    </ul>
+
+        
+    <a id="mouse"></a>
+    <h2>
+        Mouse</h2>
+    <div class="menu">
+        <span>MOUSE</span>
+        <ol>
+            <li><a href="#mouse_initialise">Initialise</a></li>
+            <li><a href="#mouse_coordinates">Coordinates</a></li>
+            <li><a href="#mouse_cursor">Cursor</a></li>
+            <li>Back</li>
+        </ol>
+    </div>
+    <p>
+        The demos are designed to be hot-pluggable.</p>
+    <a id="mouse_initialise"></a>
+    <h3>Initialise</h3>
+    <p>
+        This tries to work out what sort of mouse is connected. Whilst it repeatedly tries to initialise the mouse, the run indicator will appear. You can exit at any time. 
+        Finally, when the mouse has been identified, it will display the type on-screen and wait for a key press. Unlike your PC, this part is effectively "hot-pluggable" - just leave it waiting at the Initialise menu, then plug in your device.
+    </p>
+    
+    <a id="mouse_coordinates"></a>
+    <h3>Coordinates</h3>
+    <p>This primitive demonstration just displays the current X, Y and Z coordinates on screen along with the button status bit array. Note that the Z coordinate will not be visible if you do not have an Intellimouse (with a scroll wheel) attached.</p>
+    <p>Two of the bits in the buttons bit array correspond to the direction the mouse was moved in (one for X, one for Y). These values are only intended for internal use, and as such the Y direction is never inverted, even if you request that it is in the configuration file.</p>
+    <p>Press any key to return to the menu at any time. Note that if the display is blank, it means that the library isn't successfully running updates with the mouse.</p>
+    <p>The range of values in this demo are very small (restricted to keep the cursor on-screen for the Cursor demo). In reality, the X and Y values can go the full range of the 16-bit counters.</p>
+    
+    <a id="mouse_cursor"></a>
+    <h3>Cursor</h3>
+    <p>This demonstration displays a cursor on the screen that can be moved around with the mouse. It is safely clipped by the library to the edges of the display.</p>
+    <p>You can scribble on the screen by clicking and dragging the mouse. If the cursor vanishes, it's because the mouse cannot be detected.</p>
+    <p>Press <span class="key">Del</span> to clear the screen. Any other key will exit.</p>
+
+</body>
+</html>
