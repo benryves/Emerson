@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+
+   <style>
+        body {
+            font-family: verdana, arial, helvetica, sans serif;
+            font-size: 12px;
+            line-height: 160%;
+            width: 600px;
+            text-align: justify;
+            background-color: black;
+            color: white;
+            padding: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+        }
+        html {
+            background-color: #333333;
+        }
+        #abstractions th {
+            border: 2px solid white;
+            padding: 3px;
+            background-color: #CCCCCC;
+            font-family: consolas, lucida console;
+            color: black;
+        }
+        #abstractions td {
+            font-size: 28px;
+        }
+        #abstractions {
+            margin-left: auto;
+            margin-right: auto;            
+        }
+        tt, .code {
+            font-family: consolas, lucida console;            
+        }
+        a {
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px dotted #999999;
+        }
+        a:hover {
+            color: #EEEEFF;
+        }
+        .code pre {
+            line-height: 100%;
+            height: 250px;
+            overflow: auto;
+            margin: 0px;
+            padding: 5px;
+            background-color: #333333;
+        }
+        .code a {
+            margin: 0px;
+        }
+        h1 {
+            font-family: consolas, lucida console;
+            font-size: 24px;
+            text-align: center;
+            border-bottom: 2px solid #CCCCCC;
+            padding-bottom: 10px;
+            margin-top: 50px;
+            font-weight: normal;
+        }
+        #title h1 {
+            border: none;
+            font-size: 32px;
+            font-weight: bolder;
+            margin: 0px;
+        }
+        #title {
+            text-align: center;
+            border: 2px white dotted;
+            padding: 30px;
+        }
+        #title p {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0px;
+        }
+        #circuit {
+            border: 2px #999999 solid;
+            width: 320px;
+            height: 242px;
+            padding: 2px;
+            margin-left: auto;
+            margin-right: auto;            
+        }
+   </style>
+
+   <head> 
+      <title>Emerson - AT and PS/2 Keyboard Routines for the TI-83 Plus</title>
+   </head>
+
+   <body>
+   
+    <div id="title">
+        <h1>Emerson</h1>
+        <p>Ben Ryves 2005-2006</p>
+        <p>A MaxCoderz Production</p>
+    </div>
+    <p align="center">AT and PS/2 Keyboard Routines for the TI-83 Plus Series Calculator</p>
+    <p align="center">Inspired by Cullen Ashford Logan's work.</p>
+    
+
+
+    <h1>Terms of Use</h1>
+    <p>You are free to use these routines as you like; but I stand by the notion of "credit where credit's due" - so if you do use part of my work in your own project, please bung me in the credits somewhere!</p>
+    <p>If you hit on problems dealing with common unsupported keys; or hit on a more elegant solution for internationalisation, please get in contact with me so that this package can be updated.</p>
+
+    <h1>Updates and Contact</h1>
+    <p>Before using this package, please check for updated versions at <a href="http://www.benryves.com/bin/emerson">the official website</a>. Contact is best through <a href="mailto:benryves@benryves.com">email</a>.</p>
+
+    <h1>Basic Description</h1>
+    <p>Emerson offers three levels of abstraction from the keyboard:</p>
+    <ul>
+        <li>Basic AT protocol; sending and receiving bytes directly to/from the connected keyboard.</li>
+        <li>Handling scancodes; having the routines call a user-defined routine when a key up or key down event occurs.</li>
+        <li>Converting scancodes; layout-specific key mapping (helper routines).</li>
+    </ul>
+    <table id="abstractions">
+        <tr>
+            <th>AT_Prtcl.asm</th><td>&rarr;<br />&larr;</td><th>Keyboard.asm</th><td>&rarr;</td><th>Key_Input.asm</th>
+        </tr>
+    </table>
+    <p>The idea of this package is that you should mainly deal with the keyboard scancode routines, and that (if need be) you can use the functions in the keyboard input routines to extract the value of the key (ASCII mapping). Because I only have access to a UK layout keyboard, the current format is subject to change, and have probably missed a great deal of keys out. Also, the scancode equates are named (in the include file) by what appears on the key on a UK layout; this is likely to be quite different in other parts of the world.</p>
+    <p>The nature of these include files means that you should only ever <tt>.include</tt> one of them. <tt>AT_Prtcl.asm</tt> is self-sufficient and can be used alone, <tt>Keyboard.asm</tt> relies on <tt>AT_Prtcl.asm</tt> and so includes it for you, and <tt>Key_Input.asm</tt> is useless alone and so includes <tt>Keyboard.asm</tt> (and therefore <tt>AT_Prtcl.asm</tt>) for you.</p>
+    <p>The AT protocol routines appear in <tt>AT_Prtcl.asm</tt> - the usage of these should be fairly self-explanatory, and for those wishing to write their own routines based on them should not find it too tricky to use.</p>
+    <p>When I refer to a scancode, I do not mean the scancode reported by the keyboard. Quite a lot of the keys on a keyboard have multibyte scancodes (that is, the code is made up by multiple bytes for a single key), so Emerson makes life easier for you by squashing these codes down to a single byte. This adjusted code is still specific to the <i>position on the keyboard</i> (and <i>not</i> the value of the key: for example, the letter "Q" on a UK keyboard will probably have the same code as the letter "A" on a French keyboard, as they are in the same position). If you need to deal with the value of the key, use <tt>Key_Input.asm</tt> to translate it based on a table the user installs on their calculator. These adjusted scancodes are referred to as <i>Emerson</i> codes.</p>
+    
+    <h1>Electrical Interface</h1>
+    <div id="circuit"><img src="circuit.gif" alt="Circuit" title="Circuit" /></div>
+    <p>The circuit used to connect an AT or PS/2 keyboard to the calculator is extremely simple. Note that the PS/2 port shown is the socket side, not the plug side. 5V seems about right to power a keyboard, but you shouldn't have too many problems a little above or below this level.</p>
+    
+    <h1>Keyboard Usage</h1>
+    <p>The keyboard handler is pseudo-"event driven". Rather than rely on interrupts, you are required to call the function <tt>keyb_update</tt> in your main loop (I have done it this way for simplicity. You can create your own interrupt handler that calls the function if you so wish). This function runs an update on the keyboard, reading in any key events from the hardware, adjusting the keyboard LEDs (Emerson handles Num/Scroll/Caps locking for you) and fires off the event handlers you have attached.</p>
+    <p>You can attach two event handlers, one for key up and one for key down. You can also clear the handlers. The event handler is passed the Emerson code (scancode) in the accumulator. It then does whatever it likes, before returning. Please note that you may not change the value of <tt>ix</tt>, so if you decide to do so please save it away then restore it once you are done.</p>
+    <p>To use the keyboard routines, you must give Emerson a space to buffer input. I think the best way to illustrate all this is with an example, so here goes:</p>
+    <div class="code">
+    <pre>main
+	; Set up event handlers.
+
+	ld hl,key_down
+	call keyb_set_keydown
+
+	ld hl,key_up
+	call keyb_set_keyup
+	
+	; We want the screen to scroll automatically:
+	
+	set appAutoScroll,(iy+appFlags)
+
+	; Here we have our main loop
+
+loop
+	call keyb_update ; Run any keyboard updates
+	
+	bcall(_GetCSC) ; \
+	cp skClear     ;  &gt; Quit?
+	ret z	       ; /
+	
+	jp loop  ; Loop around.
+
+; Event handlers:
+
+key_down
+	bcall(_newline)
+	ld l,a
+	ld h,0
+	bcall(_DispHL)
+	ld a,$1F ; Down arrow
+	bcall(_PutC)
+	ret
+	
+key_up
+	bcall(_newline)
+	ld l,a
+	ld h,0
+	bcall(_DispHL)
+	ld a,$1E ; Up arrow
+	bcall(_PutC)	
+	ret
+
+
+.module Keyboard
+_buffer = saveSScreen	; Set this to a safe RAM location
+_buffer_size = 16	; How many bytes do you want to buffer?
+.endmodule
+
+.include "Emerson/Keyboard.asm"</pre></div>
+    <p>This program is one of the simplest demonstrations on how to use these routines, and serves as a good test.</p>
+    <p>Firstly, it tells Emerson where the two event handlers are. It then sets an OS flag to make the text output routines scroll the screen if we try and write off the bottom of them. It then enters the main loop, which calls <tt>keyb_update</tt>, then checks to see if the Clear key has been pressed using the standard TIOS routines, before looping back for the next keyboard update.</p>
+    <p>Underneath all this, we have the two event handlers. Both are almost identical - they move to the next line, load the Emerson code into <tt>hl</tt>, display HL using the TIOS routine, then display either character $1F (which is &darr;) or $1E (which is &uarr;) to show whether this was a key up or a key down event.</p>
+    <p>Last of all, we have the configuration block - we're storing a 16-byte key buffer in <tt>saveSScreen</tt>, a safe RAM area, then we include the basic keyboard routines through <tt>Keyboard.asm</tt>.</p>
+    <p>If you compile and run this, there are some things you should notice:</p>
+    <ul>
+        <li><tt>keyb_update</tt> is not blocking. If the keyboard isn't sending anything - even if it's not plugged in or powered up - <tt>keyb_update</tt> doesn't lock up program execution. In fact, the keyboard is hot-pluggable.</li>
+        <li>Emerson handles the keyboard LEDs for you.</li>
+        <li>Most of the keys (at least, on my test keyboard) should do something - this includes odd keys like the Windows keys, Application key, power management keys &amp;c. Unrecognised keys are safely ignored.</li>
+    </ul>
+    <p>Here is a more complete sample, that allows you to control the position of a sprite with the cursor keys of an attached keyboard.</p>
+    <div class="code">
+    <pre>.varloc saveSScreen, 768
+.var 1, keyboard_input
+.var 1, sprite_x
+.var 1, sprite_y
+
+main
+
+	; Stick our sprite in the middle of the screen
+	
+	ld a,(96/2)-4
+	ld (sprite_x),a
+
+	ld a,(64/2)-4
+	ld (sprite_y),a
+	
+	; Set up event handlers.
+
+	ld hl,key_down
+	call keyb_set_keydown
+
+	ld hl,key_up
+	call keyb_set_keyup
+	
+	; Make the keyboard mask 'all keys up':
+	ld a,$FF
+	ld (keyboard_input),a
+
+	; Here we have our main loop
+
+loop
+	; Draw the sprite
+	bcall(_GrBufClr)
+	ld a,(sprite_y)
+	ld l,a
+	ld a,(sprite_x)
+	ld b,8
+	ld ix,sprite
+	call ionPutSprite
+	
+	call ionFastCopy
+	
+	
+	; Get the input:
+	ld a,Keyrow_Pad
+	out (1),a
+	in a,(1)
+	ld b,a
+	ld a,(keyboard_input)
+	and b
+	
+	; Move the sprite
+	ld hl,sprite_x
+	bit bLeft,a
+	jr nz,{+}
+	dec (hl)
++	
+	bit bRight,a
+	jr nz,{+}
+	inc (hl)
++
+
+	ld hl,sprite_y
+	bit bUp,a
+	jr nz,{+}
+	dec (hl)
++	
+	bit bDown,a
+	jr nz,{+}
+	inc (hl)
++
+
+	; Stop the sprite from going off the screen
+	ld a,(sprite_x)
+	cp -1
+	jr nz,{+}
+	xor a
+	ld (sprite_x),a
++	cp 97-8
+	jr nz,{+}
+	ld a,96-8
+	ld (sprite_x),a
++
+
+	ld a,(sprite_y)
+	cp -1
+	jr nz,{+}
+	xor a
+	ld (sprite_y),a
++	cp 65-8
+	jr nz,{+}
+	ld a,64-8
+	ld (sprite_y),a
++
+	call keyb_update ; Run any keyboard updates	
+	ei
+	
+	bcall(_GetCSC) ; \
+	cp skClear     ;  &gt; Quit?
+	ret z	       ; /
+	
+	cp sk2nd
+	call z,customise_keys
+		
+	jp loop  ; Loop around.
+
+; Key customisation:
+customise_keys
+	; Set the new handlers
+	call keyb_reset_keyup ; Don't need a key up event
+	ld hl,customise_down
+	call keyb_set_keydown ; Set our key down event
+	
+	; Reset the position in the key table we're updating
+	ld hl,key_map
+	ld (customise_key+1),hl
+	
+	; Clear and jump to the top of the screen
+	bcall(_ClrLCD)
+	bcall(_homeup)
+	
+	ld b,4 ; We have four keys to set
+set_all_keys
+	
+	; Clear the kit that represents that a key has been pressed
+	res 0,(iy+asm_Flag1)
+	
+	; Display the prompt
+	ld hl,press_text
+	bcall(_PutS)
+	
+	; Draw the arrow
+	ld a,4
+	sub b
+	ld e,a
+	ld d,0
+	ld hl,press_arrows
+	add hl,de
+	ld a,(hl)
+	bcall(_PutC)
+	bcall(_newline)
+	
+wait_new_key
+	bcall(_GetCSC)
+	cp skClear
+	jp z,done_customise
+
+	push bc
+	call keyb_update
+	ei
+	pop bc
+	
+	bit 0,(iy+asm_Flag1)
+	jr z,wait_new_key
+	
+	; At this point, we have set the new key!
+	djnz set_all_keys
+
+done_customise
+	; Restore the handlers, and "release" the keys
+	
+	ld hl,key_down
+	call keyb_set_keydown
+	ld hl,key_up
+	call keyb_set_keyup
+	ld a,$FF
+	ld (keyboard_input),a
+	ret
+
+press_text
+.asc "Press ",0
+press_arrows
+.db $06, $07, $CF, $05
+
+; Sprite graphic
+sprite
+.db %00011000
+.db %00100100
+.db %01011010
+.db %10100101
+.db %10100101
+.db %11011011
+.db %10100101
+.db %01000010
+
+; Event handlers:
+key_down
+	call key_lookup
+	ret nz
+	ld b,a
+	ld a,(keyboard_input)
+	and b
+	ld (keyboard_input),a
+	ret
+	
+key_up
+	call key_lookup
+	ret nz
+	cpl
+	ld b,a
+	ld a,(keyboard_input)
+	or b
+	ld (keyboard_input),a
+	ret
+
+customise_down
+	bit 0,(iy+asm_Flag1)
+	ret nz ; Already set a key, so quit.
+customise_key
+	ld (key_map),a
+	ld hl,(customise_key+1)
+	inc hl
+	ld (customise_key+1),hl
+	set 0,(iy+asm_Flag1)
+	ret
+
+; Code to convert an Emerson code into a direct input mask
+key_lookup
+	ld hl,key_map
+	ld bc,4
+	cpir
+	ret nz
+	ld de,3
+	add hl,de
+	ld a,(hl)
+	ret
+	
+; Direct key equates
+KeyRow_Pad = $FE
+dKDown     = %11111110
+dKLeft     = %11111101
+dKRight    = %11111011
+dKUp       = %11110111
+
+; Which bit is unset for a key?
+bDown      = 0
+bLeft      = 1
+bRight     = 2
+bUp        = 3
+
+; Key map:
+key_map
+.db em_sce_up, em_sce_down, em_sce_left, em_sce_right
+.db dkUp, dkDown, dkLeft, dkRight
+
+
+; Emerson module
+.module Keyboard
+_buffer = saveSScreen+32 ; (The routines above use some of saveSScreen)
+_buffer_size = 16	 ; How many bytes do you want to buffer?
+.endmodule
+.include "Emerson/Keyboard.asm"</pre>
+    </div>
+    <p>When running this sample, press 2nd to customise the key bindings (it shall prompt you for the four direction keys). This would be good practice, though for a real project I suspect you'd provide a slightly slicker interface! It transparently allows the user to use either the standard keys on their calculator or on an external keyboard, and there is nowhere that the program can lock up at (it allows the user to use Clear at the keyboard customisation stage).</p>
+
+
+   </body>
+</html>

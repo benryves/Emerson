@@ -1,0 +1,28 @@
+<project name="Emerson" version="2" expanded="True" binary="EMERSON" source="Mouse Demo.asm">
+  <build default="false">Build\TI-83 (Ion).cmd</build>
+  <build default="true">Build\TI-83 Plus (Ion).cmd</build>
+  <build default="false">Build\TI-83 Plus (MirageOS).cmd</build>
+  <help file="brass.xml" />
+  <help file="ion.xml" />
+  <help file="mirage.xml" />
+  <help file="ti83p.xml" />
+  <help file="tios_entrypoints.xml" />
+  <help file="tios_values.xml" />
+  <help file="z80.xml" />
+  <openfile>Emerson\Emerson.asm</openfile>
+  <openfile>Mouse Demo.asm</openfile>
+  <openfile>Terminal.asm</openfile>
+  <openfile>Emerson\Keyboard.asm</openfile>
+  <openfile>Emerson\AT_Prtcl_OLD.asm</openfile>
+  <openfile>Emerson\Key_Input.asm</openfile>
+  <openfile>Routines\Keyb_UK.asm</openfile>
+  <openfile>Routines\Keyboard.asm</openfile>
+  <openfile>D:\Documents\Visual Studio 2005\Projects\Latenite\Latenite\bin\Projects\Picohertz\Picohertz.asm</openfile>
+  <openfile default="True">D:\Documents\Visual Studio 2005\Projects\Latenite\Latenite\bin\Projects\Picohertz\Points.asm</openfile>
+  <expandedfolder>\Bin</expandedfolder>
+  <expandedfolder>\Build</expandedfolder>
+  <expandedfolder>\Emerson</expandedfolder>
+  <expandedfolder>\Includes</expandedfolder>
+  <expandedfolder>\Resources</expandedfolder>
+  <expandedfolder>\Routines</expandedfolder>
+</project>
