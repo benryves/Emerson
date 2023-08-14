@@ -1,7 +1,0 @@
-*.o
-*.err
-*.lis
-*.map
-*.com
-*.bin
-runapp.cmd
