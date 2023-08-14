@@ -21,8 +21,7 @@ LinkNeutral  = %11010000  ; ORd value written to bport.
 ; Definitions for the "clock" and "data" line bitmasks
 ; .........................................................
 
-Line.Clock = %01
-Line.Data  = %10
+.enum Line, Clock = %01, Data = %10
 
 ; .........................................................
 ; Equates for the various AT command bytes

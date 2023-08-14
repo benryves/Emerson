@@ -12,11 +12,9 @@
   <help file="tios_entrypoints.xml" />
   <help file="tios_values.xml" />
   <help file="z80.xml" />
-  <openfile>Program.asm</openfile>
-  <openfile>Emerson\Modules\AT Protocol.asm</openfile>
-  <openfile default="True">C:\Documents and Settings\Benjamin\Desktop\I²C.asm</openfile>
+  <openfile default="True">Program.asm</openfile>
+  <openfile>Emerson\Modules\Keyboard.asm</openfile>
   <expandedfolder>\Emerson</expandedfolder>
-  <expandedfolder>\Emerson\Modules</expandedfolder>
   <expandedfolder>\Includes</expandedfolder>
   <expandedfolder>\Resources</expandedfolder>
 </project>

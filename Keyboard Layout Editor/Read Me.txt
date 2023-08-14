@@ -1,0 +1,5 @@
+Known Issues
+
+Each time you open a file, a new key (<NEW>) is added. Delete it manually.
+
+This editor sucks.

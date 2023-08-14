@@ -1,0 +1,3 @@
+This code is horrible. My code is usually not this bad.
+
+Compile in VS 2005. The freeware Express Edition is sufficient.
