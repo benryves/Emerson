@@ -60,7 +60,8 @@ namespace Keyboard_Layout_Editor {
 					X.WriteStartElement("key");
 					X.WriteAttributeString("friendlyname", PK.FriendlyName);
 					X.WriteAttributeString("scancode", PK.ScanCode.ToString());
-					X.WriteAttributeString("devicecode", PK.DeviceCode.ToString());
+					if (PK.DeviceCode != 0) X.WriteAttributeString("devicecode", PK.DeviceCode.ToString());
+					if (PK.SecondaryDeviceCode != 0) X.WriteAttributeString("secondarydevicecode", PK.SecondaryDeviceCode.ToString());
 					X.WriteAttributeString("isextended", PK.IsExtended.ToString());
 					X.WriteAttributeString("ismodifier", PK.IsModifier.ToString());
 					if (PK.IsModifier) {
@@ -122,6 +123,9 @@ namespace Keyboard_Layout_Editor {
 							break;
 						case "devicecode":
 							PK.DeviceCode = byte.Parse(A.Value);
+							break;
+						case "secondarydevicecode":
+							PK.SecondaryDeviceCode = byte.Parse(A.Value);
 							break;
 						case "isextended":
 							PK.IsExtended = bool.Parse(A.Value);
@@ -567,6 +571,7 @@ namespace Keyboard_Layout_Editor {
 				IsExtended.Checked = SelectedKey.IsExtended;
 				Friendly.Text = SelectedKey.FriendlyName;
 				DeviceCode.Value = SelectedKey.DeviceCode;
+				SecondaryDeviceCode.Value = SelectedKey.SecondaryDeviceCode;
 			}
 		}
 
@@ -605,9 +610,12 @@ namespace Keyboard_Layout_Editor {
 			public ushort[] DataOffsetsBinary;
 			public byte[] DataBinary;
 			public byte[] DataFullBinary;
-			public string DataOffsetsText;
-			public string DataText;
-			public string DataFullText;
+			public string DataOffsetsAsm;
+			public string DataAsm;
+			public string DataFullAsm;
+			public string DataOffsetsC;
+			public string DataC;
+			public string DataFullC;
 		}
 
 		private CompiledData GetExportData() {
@@ -622,7 +630,11 @@ namespace Keyboard_Layout_Editor {
 			}
 
 			List<ushort> DataOffsets = new List<ushort>();
-			StringBuilder KeyData = new StringBuilder(1024);
+
+			StringBuilder DataAsm = new StringBuilder(1024);
+
+			StringBuilder DataC = new StringBuilder(1024);
+			StringBuilder DataOffsetsC = new StringBuilder(1024);
 
 			List<byte> OutputData = new List<byte>();
 
@@ -656,26 +668,34 @@ namespace Keyboard_Layout_Editor {
 				}
 			}
 
-			KeyData.AppendLine("; =====================================");
-			KeyData.AppendLine(string.Format(".db \"{0}\", 0 ; Description", DescriptionText.Text.Replace("\"", "\\\"")));
+			DataAsm.AppendLine("; =====================================");
+			DataAsm.AppendLine(string.Format(".db \"{0}\", 0 ; Description", DescriptionText.Text.Replace("\"", "\\\"")));
 			foreach (char c in DescriptionText.Text) {
 				OutputData.Add((byte)c);
 			}
 			OutputData.Add(0x00);
-			KeyData.AppendLine("; =====================================");
+			DataAsm.AppendLine("; =====================================");
 
 			DataOffsets.Add((ushort)StandardKeys.Count);
 			DataOffsets.Add((ushort)ExtendedKeys.Count);
+
+			DataOffsetsC.AppendLine(string.Format("#define KEYBOARD_SCANCODE_COUNT ({0})", StandardKeys.Count));
+			DataOffsetsC.AppendLine(string.Format("#define KEYBOARD_EXTENDED_SCANCODE_COUNT ({0})", ExtendedKeys.Count));
+			DataOffsetsC.AppendLine(string.Format("#define KEYBOARD_MASK_COMBINATION_COUNT ({0})", DifferentMasks.Count));
 
 			// --- //
 			DataOffsets.Add((ushort)OutputData.Count);
 			// --- //
 
+			DataC.AppendLine("const uint8_t keyboard_masks[] PROGMEM = {");
 			foreach (byte B in DifferentMasks) {
-				KeyData.AppendLine(string.Format(".db %{0}", ToBinary(B, 8)));
+				DataAsm.AppendLine(string.Format(".db %{0}", ToBinary(B, 8)));
+				DataC.AppendLine(string.Format("\t0b{0},", ToBinary(B, 8)));
 				OutputData.Add(B);
 			}
-			KeyData.AppendLine("; -------------------------------------");
+			DataAsm.AppendLine("; -------------------------------------");
+			DataC.AppendLine("};");
+
 			int Offset = 0;
 			int BitmaskIndex = 0;
 
@@ -683,73 +703,90 @@ namespace Keyboard_Layout_Editor {
 			DataOffsets.Add((ushort)OutputData.Count);
 			// --- //
 
+			DataOffsetsC.AppendLine("const uint8_t keyboard_masks_offset[] PROGMEM = {");
 			foreach (byte B in DifferentMasks) {
 				ushort value = (ushort)(Offset + ((DifferentMasks.Count - BitmaskIndex) * 2) - 1);
-				KeyData.AppendLine(string.Format(".dw ${0:X4}", value));
+				DataAsm.AppendLine(string.Format(".dw ${0:X4}", value));
 				OutputData.Add((byte)(value & 0xFF));
 				OutputData.Add((byte)(value >> 8));
+				DataOffsetsC.AppendLine(string.Format("\t0x{0:X2},", Offset));
 				Offset += ModifierLookup[B].Count;
 				++BitmaskIndex;
 			}
-			KeyData.AppendLine("; -------------------------------------");
+			DataOffsetsC.AppendLine("};");
+
+			DataAsm.AppendLine("; -------------------------------------");
+			DataC.AppendLine("const uint8_t keyboard_masks_table[] PROGMEM = {");
 			foreach (byte B in DifferentMasks) {
-				KeyData.Append(".db ");
+				DataAsm.Append(".db ");
+				DataC.Append("\t");
 				bool First = true;
 				foreach (Byte B2 in ModifierLookup[B]) {
 					if (First) {
 						First = false;
 					} else {
-						KeyData.Append(", ");
+						DataC.Append(" ");
+						DataAsm.Append(", ");
 					}
-					KeyData.Append(string.Format("%{0}", ToBinary(B2, 8)));
+					DataAsm.Append(string.Format("%{0}", ToBinary(B2, 8)));
+					DataC.Append(string.Format("0b{0},", ToBinary(B2, 8)));
 					OutputData.Add(B2);
 				}
-				KeyData.AppendLine();
+				DataAsm.AppendLine();
+				DataC.AppendLine();
 			}
+			DataC.AppendLine("};");
 
 
 			if (IncludeDeviceCode) {
-				KeyData.AppendLine("; =====================================");
+				DataAsm.AppendLine("; =====================================");
 				foreach (var PK in StandardKeys) {
-					KeyData.AppendLine(string.Format(".db {0} ; {1} Device Code", PK.DeviceCode, PK.FriendlyName));
+					DataAsm.AppendLine(string.Format(".db {0} ; {1} Device Code", PK.DeviceCode, PK.FriendlyName));
 					OutputData.Add(PK.DeviceCode);
 				}
-				KeyData.AppendLine("; -------------------------------------");
+				DataAsm.AppendLine("; -------------------------------------");
 				foreach (var PK in ExtendedKeys) {
-					KeyData.AppendLine(string.Format(".db {0} ; {1} Device Code", PK.DeviceCode, PK.FriendlyName));
+					DataAsm.AppendLine(string.Format(".db {0} ; {1} Device Code", PK.DeviceCode, PK.FriendlyName));
 					OutputData.Add(PK.DeviceCode);
 				}
 			}
 
-			KeyData.AppendLine("; =====================================");
+			DataAsm.AppendLine("; =====================================");
 			{
+				DataC.AppendLine("const uint8_t keyboard_scancodes[] PROGMEM = {");
+				DataC.AppendLine("\t/* Standard */");
 				{
 					// --- //
 					DataOffsets.Add((ushort)OutputData.Count);
 					// --- //
 					foreach (PhysicalKey PK in StandardKeys) {
-						KeyData.AppendLine(string.Format(".db ${0:X2} ; {1}", PK.ScanCode, PK.FriendlyName));
+						DataAsm.AppendLine(string.Format(".db ${0:X2} ; {1}", PK.ScanCode, PK.FriendlyName));
+						DataC.AppendLine(string.Format("\t0x{0:X2}, /* {1} */", PK.ScanCode, PK.FriendlyName));
 						OutputData.Add(PK.ScanCode);
 					}
 				}
-				KeyData.AppendLine("; -------------------------------------");
+				DataAsm.AppendLine("; -------------------------------------");
+				DataC.AppendLine("\t/* Extended */");
 				{
 					// --- //
 					DataOffsets.Add((ushort)OutputData.Count);
 					// --- //
 					foreach (PhysicalKey PK in ExtendedKeys) {
-						KeyData.AppendLine(string.Format(".db ${0:X2} ; {1}", PK.ScanCode, PK.FriendlyName));
+						DataAsm.AppendLine(string.Format(".db ${0:X2} ; {1}", PK.ScanCode, PK.FriendlyName));
+						DataC.AppendLine(string.Format("\t0x{0:X2}, /* {1} */", PK.ScanCode, PK.FriendlyName));
 						OutputData.Add(PK.ScanCode);
 					}
 				}
+				DataC.AppendLine("};");
 			}
-			KeyData.AppendLine("; =====================================");
+			DataAsm.AppendLine("; =====================================");
 
 			// --- //
 			DataOffsets.Add((ushort)OutputData.Count);
 			// --- //
 
 			int TotalOffset = 0;
+			int TotalOffsetIncludingPhysical = 0;
 
 			List<int> Sizes = new List<int>();
 
@@ -757,6 +794,7 @@ namespace Keyboard_Layout_Editor {
 
 			int KeyIndex = 0;
 
+			DataOffsetsC.AppendLine("const uint16_t keyboard_data_offsets[] PROGMEM = {");
 			for (int i = 0; i < 2; ++i) {
 				foreach (PhysicalKey PK in new List<PhysicalKey>[] { StandardKeys, ExtendedKeys }[i]) {
 
@@ -766,7 +804,8 @@ namespace Keyboard_Layout_Editor {
 						if (PK.IsToggle) ExtendedInfo |= 4;
 					}
 
-					KeyData.AppendLine(string.Format(".dw (%{1} << 12) | ${0:X4}", TotalOffset + ((TotalKeys - 2) * 2) - 1, ToBinary(ExtendedInfo, 4)));
+					DataAsm.AppendLine(string.Format(".dw (%{1} << 12) | ${0:X4}", TotalOffset + ((TotalKeys - 2) * 2) - 1, ToBinary(ExtendedInfo, 4)));
+					DataOffsetsC.AppendLine(string.Format("\t(0b{1} << 12) | 0x{0:X4}, /* {2} */", TotalOffsetIncludingPhysical, ToBinary(ExtendedInfo, 4), PK.FriendlyName));
 
 					ushort value = (ushort)((TotalOffset + ((TotalKeys - KeyIndex) * 2) - 1) | (ExtendedInfo << 12));
 					OutputData.Add((byte)(value & 0xFF));
@@ -785,53 +824,81 @@ namespace Keyboard_Layout_Editor {
 
 					Sizes.Add(Size);
 					TotalOffset += Size;
+
+					TotalOffsetIncludingPhysical += Size;
+					++TotalOffsetIncludingPhysical;
+					if (PK.DeviceCode != 0 && PK.SecondaryDeviceCode != 0) {
+						++TotalOffsetIncludingPhysical;
+					}
+
 					++KeyIndex;
 				}
 
 			}
-			KeyData.AppendLine("; =====================================");
+			DataOffsetsC.AppendLine("};");
+			DataAsm.AppendLine("; =====================================");
 
 			// --- //
 			DataOffsets.Add((ushort)OutputData.Count);
 			// --- //
 
+			DataC.AppendLine("const uint8_t keyboard_data[] PROGMEM = {");
 			List<bool> NonPrintableBits = new List<bool>();
 			int k = 0;
 			for (int i = 0; i < 2; ++i) {
 				foreach (PhysicalKey PK in new List<PhysicalKey>[] { StandardKeys, ExtendedKeys }[i]) {
+
+					DataC.AppendFormat("\t/* {0} */ ", PK.ToString());
+
+					if (PK.DeviceCode == 0) {
+						DataC.Append("0, ");
+					} else {
+						DataC.AppendFormat("/* INKEY({0}) */ {1}{2}, ", -PK.DeviceCode, PK.DeviceCode, PK.SecondaryDeviceCode != 0 ? " | 0x80" : "");
+						if (PK.SecondaryDeviceCode != 0) {
+							DataC.AppendFormat("/* INKEY({0}) */ {1}, ", -PK.SecondaryDeviceCode, PK.SecondaryDeviceCode);
+						}
+					}
+
 					int Size = Sizes[k++];
 
 					if (PK.IsModifier) {
 						NonPrintableBits.Add(false);
-						KeyData.Append(string.Format(".db %{0}", ToBinary(1 << PK.ModifierIndex, 8)));
+						DataAsm.Append(string.Format(".db %{0}", ToBinary(1 << PK.ModifierIndex, 8)));
+						DataC.AppendFormat("0b{0}, ", ToBinary(1 << PK.ModifierIndex, 8));
 						OutputData.Add((byte)(1 << PK.ModifierIndex));
 						if (PK.IsToggle) {
 							NonPrintableBits.Add(false);
-							KeyData.Append(string.Format(", %{0}", ToBinary(1 << PK.LedIndex, 8)));
+							DataAsm.Append(string.Format(", %{0}", ToBinary(1 << PK.LedIndex, 8)));
+							DataC.AppendFormat("0b{0}, ", ToBinary(1 << PK.LedIndex, 8));
 							OutputData.Add((byte)(1 << PK.LedIndex));
 						}
-						KeyData.AppendLine(" ; Modifier data for next key.");
+						DataAsm.AppendLine(" ; Modifier data for next key.");
+						DataC.Append("/* <- Modifier */ ");
 					}
 					NonPrintableBits.Add(false);
-					KeyData.Append(string.Format(".db %{0}", ToBinary(PK.ModifierMask, 8)));
+					DataAsm.Append(string.Format(".db %{0}", ToBinary(PK.ModifierMask, 8)));
+					DataC.AppendFormat("0b{0}, ", ToBinary(PK.ModifierMask, 8));
 					OutputData.Add(PK.ModifierMask);
 
 					List<int> AddedModifications = new List<int>();
 					for (int m = 0; m < 256; ++m) {
 						int Modifier = m & PK.ModifierMask;
 						if (!AddedModifications.Contains(Modifier)) {
-							KeyData.Append(string.Format(", ${0:X2}", PK.Values[Modifier]));
+							DataAsm.Append(string.Format(", ${0:X2}", PK.Values[Modifier]));
+							DataC.AppendFormat("0x{0:X2}, ", PK.Values[Modifier]);
 							OutputData.Add(PK.Values[Modifier]);
 							NonPrintableBits.Add(PK.IsNonPrintable[Modifier]);
 							AddedModifications.Add(Modifier);
 						}
 					}
 
-					KeyData.AppendLine(" ; " + PK.ToString());
+					DataAsm.AppendLine(" ; " + PK.ToString());
+					DataC.AppendLine();
 				}
 			}
+			DataC.AppendLine("};");
 
-			KeyData.AppendLine("; =====================================");
+			DataAsm.AppendLine("; =====================================");
 
 			// --- //
 			DataOffsets.Add((ushort)OutputData.Count);
@@ -843,21 +910,25 @@ namespace Keyboard_Layout_Editor {
 					NonPrintableBytes[i >> 3] |= (byte)(0x80 >> (i & 7));
 				}
 			}
+
+			DataC.AppendLine("const uint8_t keyboard_unprintable_data[] PROGMEM = {");
 			foreach (byte b in NonPrintableBytes) {
-				KeyData.AppendLine(string.Format(".db %{0}", ToBinary(b, 8)));
+				DataAsm.AppendLine(string.Format(".db %{0}", ToBinary(b, 8)));
+				DataC.AppendLine(string.Format("\t0b{0},", ToBinary(b, 8)));
 				OutputData.Add(b);
 			}
+			DataC.AppendLine("};");
 
 
 			//Console.WriteLine(DataOffsets.Count);
 
-			string Offsets = ".dw ";
+			string DataOffsetsAsm = ".dw ";
 			for (int i = 0; i < DataOffsets.Count; ++i) {
 				if (i >= 2) {
 					DataOffsets[i] += (ushort)(DataOffsets.Count * 2);
 				}
-				if (i != 0) Offsets += ", ";
-				Offsets += "$" + ((int)(DataOffsets[i])).ToString("X4");
+				if (i != 0) DataOffsetsAsm += ", ";
+				DataOffsetsAsm += "$" + ((int)(DataOffsets[i])).ToString("X4");
 			}
 
 			//Clipboard.SetText(Offsets + "\r\n" + KeyData.ToString());
@@ -874,9 +945,12 @@ namespace Keyboard_Layout_Editor {
 				DataOffsetsBinary = DataOffsets.ToArray(),
 				DataBinary = OutputData.ToArray(),
 				DataFullBinary = OutputBinary,
-				DataOffsetsText = Offsets,
-				DataText = KeyData.ToString(),
-				DataFullText = Offsets + Environment.NewLine + KeyData.ToString(),
+				DataOffsetsAsm = DataOffsetsAsm,
+				DataAsm = DataAsm.ToString(),
+				DataFullAsm = DataOffsetsAsm + Environment.NewLine + DataAsm.ToString(),
+				DataOffsetsC = DataOffsetsC.ToString(),
+				DataC = DataC.ToString(),
+				DataFullC = DataOffsetsC.ToString() + DataC.ToString(),
 			};
 		}
 
@@ -947,6 +1021,11 @@ namespace Keyboard_Layout_Editor {
 
 		private void DeviceCode_ValueChanged(object sender, EventArgs e) {
 			SelectedKey.DeviceCode = (byte)DeviceCode.Value;
+			UpdateSelected();
+		}
+
+		private void SecondaryDeviceCode_ValueChanged(object sender, EventArgs e) {
+			SelectedKey.SecondaryDeviceCode = (byte)SecondaryDeviceCode.Value;
 			UpdateSelected();
 		}
 
@@ -1138,7 +1217,19 @@ namespace Keyboard_Layout_Editor {
 			if (this.ExportAssemblyDialog.ShowDialog(this) == DialogResult.OK) {
 				var data = this.GetExportData();
 				try {
-					File.WriteAllText(this.ExportAssemblyDialog.FileName, data.DataFullText);
+					File.WriteAllText(this.ExportAssemblyDialog.FileName, data.DataFullAsm);
+				} catch (Exception ex) {
+					MessageBox.Show(this, "Could not export: " + ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
+
+
+		private void toTextCToolStripMenuItem_Click(object sender, EventArgs e) {
+			if (this.ExportCDialog.ShowDialog(this) == DialogResult.OK) {
+				var data = this.GetExportData();
+				try {
+					File.WriteAllText(this.ExportCDialog.FileName, data.DataFullC);
 				} catch (Exception ex) {
 					MessageBox.Show(this, "Could not export: " + ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}

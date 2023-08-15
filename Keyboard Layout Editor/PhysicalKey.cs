@@ -14,8 +14,9 @@ namespace Keyboard_Layout_Editor {
         public string FriendlyName = "";
 
 		public byte DeviceCode = 0x00;
+		public byte SecondaryDeviceCode = 0x00;
 
-        public byte[] Values = new byte[256];
+		public byte[] Values = new byte[256];
         public bool[] IsNonPrintable = new bool[256];
 
         public byte ModifierMask = 0;
