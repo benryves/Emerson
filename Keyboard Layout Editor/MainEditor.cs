@@ -843,7 +843,8 @@ namespace Keyboard_Layout_Editor {
 			// --- //
 
 			DataC.AppendLine("const uint8_t keyboard_data[] PROGMEM = {");
-			List<bool> NonPrintableBits = new List<bool>();
+			List<bool> NonPrintableBitsAsm = new List<bool>();
+			List<bool> NonPrintableBitsC = new List<bool>();
 			int k = 0;
 			for (int i = 0; i < 2; ++i) {
 				foreach (PhysicalKey PK in new List<PhysicalKey>[] { StandardKeys, ExtendedKeys }[i]) {
@@ -852,22 +853,27 @@ namespace Keyboard_Layout_Editor {
 
 					if (PK.DeviceCode == 0) {
 						DataC.Append("0, ");
+						NonPrintableBitsC.Add(false);
 					} else {
 						DataC.AppendFormat("/* INKEY({0}) */ {1}{2}, ", -PK.DeviceCode, PK.DeviceCode, PK.SecondaryDeviceCode != 0 ? " | 0x80" : "");
+						NonPrintableBitsC.Add(false);
 						if (PK.SecondaryDeviceCode != 0) {
 							DataC.AppendFormat("/* INKEY({0}) */ {1}, ", -PK.SecondaryDeviceCode, PK.SecondaryDeviceCode);
+							NonPrintableBitsC.Add(false);
 						}
 					}
 
 					int Size = Sizes[k++];
 
 					if (PK.IsModifier) {
-						NonPrintableBits.Add(false);
+						NonPrintableBitsAsm.Add(false);
+						NonPrintableBitsC.Add(false);
 						DataAsm.Append(string.Format(".db %{0}", ToBinary(1 << PK.ModifierIndex, 8)));
 						DataC.AppendFormat("0b{0}, ", ToBinary(1 << PK.ModifierIndex, 8));
 						OutputData.Add((byte)(1 << PK.ModifierIndex));
 						if (PK.IsToggle) {
-							NonPrintableBits.Add(false);
+							NonPrintableBitsAsm.Add(false);
+							NonPrintableBitsC.Add(false);
 							DataAsm.Append(string.Format(", %{0}", ToBinary(1 << PK.LedIndex, 8)));
 							DataC.AppendFormat("0b{0}, ", ToBinary(1 << PK.LedIndex, 8));
 							OutputData.Add((byte)(1 << PK.LedIndex));
@@ -875,7 +881,8 @@ namespace Keyboard_Layout_Editor {
 						DataAsm.AppendLine(" ; Modifier data for next key.");
 						DataC.Append("/* <- Modifier */ ");
 					}
-					NonPrintableBits.Add(false);
+					NonPrintableBitsAsm.Add(false);
+					NonPrintableBitsC.Add(false);
 					DataAsm.Append(string.Format(".db %{0}", ToBinary(PK.ModifierMask, 8)));
 					DataC.AppendFormat("0b{0}, ", ToBinary(PK.ModifierMask, 8));
 					OutputData.Add(PK.ModifierMask);
@@ -887,7 +894,8 @@ namespace Keyboard_Layout_Editor {
 							DataAsm.Append(string.Format(", ${0:X2}", PK.Values[Modifier]));
 							DataC.AppendFormat("0x{0:X2}, ", PK.Values[Modifier]);
 							OutputData.Add(PK.Values[Modifier]);
-							NonPrintableBits.Add(PK.IsNonPrintable[Modifier]);
+							NonPrintableBitsAsm.Add(PK.IsNonPrintable[Modifier]);
+							NonPrintableBitsC.Add(PK.IsNonPrintable[Modifier]);
 							AddedModifications.Add(Modifier);
 						}
 					}
@@ -904,16 +912,26 @@ namespace Keyboard_Layout_Editor {
 			DataOffsets.Add((ushort)OutputData.Count);
 			// --- //
 
-			byte[] NonPrintableBytes = new byte[(int)Math.Ceiling(NonPrintableBits.Count / 8m)];
-			for (int i = 0; i < NonPrintableBits.Count; ++i) {
-				if (NonPrintableBits[i]) {
-					NonPrintableBytes[i >> 3] |= (byte)(0x80 >> (i & 7));
+			byte[] NonPrintableBytesAsm = new byte[(int)Math.Ceiling(NonPrintableBitsAsm.Count / 8m)];
+			for (int i = 0; i < NonPrintableBitsAsm.Count; ++i) {
+				if (NonPrintableBitsAsm[i]) {
+					NonPrintableBytesAsm[i >> 3] |= (byte)(0x80 >> (i & 7));
+				}
+			}
+			foreach (byte b in NonPrintableBytesAsm) {
+				DataAsm.AppendLine(string.Format(".db %{0}", ToBinary(b, 8)));
+				OutputData.Add(b);
+			}
+
+			byte[] NonPrintableBytesC = new byte[(int)Math.Ceiling(NonPrintableBitsC.Count / 8m)];
+			for (int i = 0; i < NonPrintableBitsC.Count; ++i) {
+				if (NonPrintableBitsC[i]) {
+					NonPrintableBytesC[i >> 3] |= (byte)(1 << (i & 7));
 				}
 			}
 
 			DataC.AppendLine("const uint8_t keyboard_unprintable_data[] PROGMEM = {");
-			foreach (byte b in NonPrintableBytes) {
-				DataAsm.AppendLine(string.Format(".db %{0}", ToBinary(b, 8)));
+			foreach (byte b in NonPrintableBytesC) {
 				DataC.AppendLine(string.Format("\t0b{0},", ToBinary(b, 8)));
 				OutputData.Add(b);
 			}
