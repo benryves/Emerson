@@ -926,7 +926,7 @@ namespace Keyboard_Layout_Editor {
 			byte[] NonPrintableBytesC = new byte[(int)Math.Ceiling(NonPrintableBitsC.Count / 8m)];
 			for (int i = 0; i < NonPrintableBitsC.Count; ++i) {
 				if (NonPrintableBitsC[i]) {
-					NonPrintableBytesC[i >> 3] |= (byte)(1 << (i & 7));
+					NonPrintableBytesC[i >> 3] |= (byte)(0x80 >> (i & 7));
 				}
 			}
 
