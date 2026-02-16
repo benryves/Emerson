@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Yes, this code is awful.
  * It works, to some extent. It was very quickly cobbled together, and it shows.
  */
@@ -19,7 +19,7 @@ using System.IO;
 namespace Keyboard_Layout_Editor {
 	public partial class MainEditor : Form {
 
-		string[] NonPrintable = new string[]{
+		readonly string[] NonPrintable = new string[]{
 			"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","-",
 			"Up","Down","Left","Right","-",
 			"Page Up","Page Down",
@@ -36,19 +36,39 @@ namespace Keyboard_Layout_Editor {
 			"Escape", "Pause",
 		};
 
-		string[] BbcBasicFunctionKeys = new string[] {
+		readonly string[] BbcBasicFunctionKeys = new string[] {
 			"Print Screen",  "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15",
 			"Windows", "Menu", "", "", "", "", "Insert", "Delete", "Home","End","Page Down", "Page Up", "Left","Right","Down","Up",
 		};
 
-		List<string> NonPrintableNames = new List<string>();
+		readonly string[] SharpPC1251Keys = new string[] {
+			"ENTER", "OFF", "CL", "CA", null, "INS", "DEL", "BRK", null, null, null, "P↔NP", "↑", "↓", "▶", "◀",
+			null, "␣", "\"", "?", "!", "#", "%", "¥", "$", "π", "√", ",", ";", ":", "@", "&&",
+			null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+			"(", ")", ">", "<", "=", "+", "-", "*", "/", "^", null, null, null, null, null, null,
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "𝐄", "█", "~", "_", null,
+			null, "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+			"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", null, null, null, null, null,
+			null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+			null, "DEF ␣", null, "DEF ?", "DEF !", "DEF #", "DEF %", "DEF ¥", "DEF $", "DEF π", "DEF √", "DEF ,", "DEF ;", "DEF :", "DEF @", "DEF &&",
+			null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+			"DEF (", "DEF )", "DEF >", "DEF <", "DEF =", "DEF +", "DEF -", "DEF *", "DEF /", "DEF ^", null, null, null, null, null, null,
+			"DEF 0", "DEF 1", "DEF 2", "DEF 3", "DEF 4", "DEF 5", "DEF 6", "DEF 7", "DEF 8", "DEF 9", "DEF .", "DEF 𝐄", "DEF █", "DEF ~", "DEF _", null,
+			null, "DEF A", "DEF B", "DEF C", "DEF D", "DEF E", "DEF F", "DEF G", "DEF H", "DEF I", "DEF J", "DEF K", "DEF L", "DEF M", "DEF N", "DEF O",
+			"DEF P", "DEF ␣", "DEF R", "DEF S", "DEF =", "DEF U", "DEF V", "DEF W", "DEF X", "DEF Y", "DEF Z", null, null, null, null, null,
+			null, "RSV A", "RSV B", "RSV C", "RSV D", "RSV E", "RSV F", "RSV G", "RSV H", "RSV I", "RSV J", "RSV K", "RSV L", "RSV M", "RSV N", "RSV O",
+			"RSV P", "RSV ␣", "RSV R", "RSV S", "RSV =", "RSV U", "RSV V", "RSV W", "RSV X", "RSV Y", "RSV Z", null, null, null, null, "NULL",
+		};
 
-		List<PhysicalKey> AllKeys = new List<PhysicalKey>();
+		readonly List<string> NonPrintableNames = new List<string>();
+
+		readonly List<PhysicalKey> AllKeys = new List<PhysicalKey>();
 
 		public void SaveXml(string filename) {
 
-			XmlWriterSettings S = new XmlWriterSettings();
-			S.Indent = true;
+			XmlWriterSettings S = new XmlWriterSettings {
+				Indent = true
+			};
 
 			using (XmlWriter X = XmlWriter.Create(filename, S)) {
 				X.WriteStartDocument();
@@ -177,43 +197,34 @@ namespace Keyboard_Layout_Editor {
 			UpdateModifiedByBoxes();
 		}
 
-		private CheckBox[] ModifiedByBoxes = new CheckBox[8];
+		private readonly CheckBox[] ModifiedByBoxes = new CheckBox[8];
 
 
-		string[] AsciiCodes = new string[] { "nul", "soh", "stx", "etx", "eot", "enq", "ack", "bel", "bs", "ht", "lf", "vt", "ff", "cr", "so", "si", "dle", "dc1", "dc2", "dc3", "dc4", "nak", "syn", "etb", "can", "em", "eof", "esc", "fs", "gs", "rs", "us" };
+		readonly string[] AsciiCodes = new string[] { "nul", "soh", "stx", "etx", "eot", "enq", "ack", "bel", "bs", "ht", "lf", "vt", "ff", "cr", "so", "si", "dle", "dc1", "dc2", "dc3", "dc4", "nak", "syn", "etb", "can", "em", "eof", "esc", "fs", "gs", "rs", "us" };
 
 		private string GetAsciiName(int id) {
-			if (KeyValueSet == KeyValueSets.BBCBasic && ((id & 0xF0) == 0x80 || (id & 0xF0) == 0xC0)) {
+			if (KeyValueSet == KeyValueSets.SharpPC1251) {
+				var key = SharpPC1251Keys[id];
+				return string.Format("{0:X2}{1}", id, key != null ? (" (" + key + ")") : "");
+			} else if (KeyValueSet == KeyValueSets.BBCBasic && ((id & 0xF0) == 0x80 || (id & 0xF0) == 0xC0)) {
 				var key = BbcBasicFunctionKeys[((id & 0xF0) == 0x80) ? (id - 0x80) : (id - 0xC0 + 0x10)];
 				return string.Format("{0:X2}{1}", id, key.Length > 0 ? (" (" + key + ")") : "");
 			} else {
 				return string.Format("{0:X2}{1}", id, id < AsciiCodes.Length ? string.Format(" ({0})", AsciiCodes[id].ToUpper()) : id == 127 ? " (DEL)" : "");
 			}
-			}
+		}
 
-			public MainEditor() {
+		public MainEditor() {
 			InitializeComponent();
-
-			int np = 0;
-			foreach (string s in NonPrintable) {
-				if (s == "-") {
-					nonPrintableToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-				} else {
-					NonPrintableNames.Add(s);
-					ToolStripMenuItem T = new ToolStripMenuItem(string.Format("{0} ({1:X2})", s, np));
-					T.Tag = (np++);
-					T.Click += new EventHandler(ChosenKey);
-					nonPrintableToolStripMenuItem.DropDownItems.Add(T);
-				}
-			}
 
 			InitialiseKeyValueSelections();
 
 			for (int i = 0; i < 8; ++i) {
-				ModifiedByBoxes[i] = new CheckBox();
-				ModifiedByBoxes[i].Dock = DockStyle.Top;
-				ModifiedByBoxes[i].Padding = new Padding(10, 0, 0, 0);
-				ModifiedByBoxes[i].Height = 18;
+				ModifiedByBoxes[i] = new CheckBox {
+					Dock = DockStyle.Top,
+					Padding = new Padding(10, 0, 0, 0),
+					Height = 18
+				};
 				ModifiedByGroup.Controls.Add(ModifiedByBoxes[i]);
 				ModifiedByBoxes[i].BringToFront();
 				ModifiedByBoxes[i].Click += new EventHandler(MainEditor_CheckedChanged);
@@ -231,6 +242,7 @@ namespace Keyboard_Layout_Editor {
 			TI83Plus,
 			ASCII,
 			BBCBasic,
+			SharpPC1251,
 		};
 
 		KeyValueSets keyValueSet;
@@ -259,6 +271,9 @@ namespace Keyboard_Layout_Editor {
 				item.Dispose();
 			}
 
+			NonPrintableNames.Clear();
+			nonPrintableToolStripMenuItem.DropDownItems.Clear();
+
 			List<ToolStripItem> UpperCaseChars = new List<ToolStripItem>();
 			List<ToolStripItem> LowerCaseChars = new List<ToolStripItem>();
 			List<ToolStripItem> NumericChars = new List<ToolStripItem>();
@@ -269,92 +284,210 @@ namespace Keyboard_Layout_Editor {
 			List<ToolStripItem> MathematicalChars = new List<ToolStripItem>();
 			List<ToolStripItem> CursorChars = new List<ToolStripItem>();
 			List<ToolStripItem> ArrowChars = new List<ToolStripItem>();
+			List<ToolStripItem> DefineChars = new List<ToolStripItem>();
+			List<ToolStripItem> ReserveChars = new List<ToolStripItem>();
+
 
 			List<ToolStripItem> ControlChars = new List<ToolStripItem>();
 
-			List<int> Punctuation = new List<int>(new int[] { 0x21, 0x22, 0x23, 0x26, 0x27, 0x28, 0x29, 0x2C, 0x2E, 0x2F, 0x3A, 0x3B, 0x3F, 0x40, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x7B, 0x7C, 0x7D, 0x7E, 0xB9, 0xBA, 0xC1 });
-			List<int> Mathematical = new List<int>(new int[] { 0x01, 0x02, 0x03, 0x04, 0x08, 0x09, 0x0D, 0x10, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x25, 0x2A, 0x2B, 0x2C, 0x2D, 0x3C, 0x3D, 0x3E, 0xCB, 0xCC, 0xD2, 0xD4, 0xD7, 0xD8, 0xDA, 0xDB, 0xDD });
-			List<int> Arrows = new List<int>(new int[] { 0x05, 0x06, 0x07, 0x1C, 0x1E, 0x1F, 0xCF, 0xEF, 0xF0 });
-
-			if (KeyValueSet == KeyValueSets.ASCII || KeyValueSet == KeyValueSets.BBCBasic) {
-
-				Punctuation.Add((int)'[');
-				Punctuation.Add((int)'$');
-				Punctuation.RemoveAll(p => p <= 32 || p > 127);
-				Punctuation.Sort();
-
-				Mathematical.RemoveAll(p => p <= 32 || p > 127);
-				Arrows.RemoveAll(p => p <= 32 || p > 127);
-			}
-
 			CharacterImageList.Images.Clear();
 
-			using (Bitmap B = (KeyValueSet == KeyValueSets.TI83Plus) ? Properties.Resources.TI83PlusMap : Properties.Resources.ASCIIMap) {
+			if (KeyValueSet == KeyValueSets.SharpPC1251) {
 
-				using (Bitmap D = new Bitmap(16, 16)) {
+				var fontIndices = new int[256];
 
-					ColorPalette P = B.Palette;
-					P.Entries[0] = Color.FromKnownColor(KnownColor.WindowText);
-					B.Palette = P;
+				using (Bitmap B = Properties.Resources.SharpMap) {
 
+					for (int k = 0; k < 256; ++k) {
 
-					Graphics G = Graphics.FromImage(D);
-					G.InterpolationMode = InterpolationMode.NearestNeighbor;
-					G.PixelOffsetMode = PixelOffsetMode.Half;
+						var T = new ToolStripMenuItem(GetAsciiName(k), null, ChosenKey) {
+							Tag = k,
+						};
 
-					for (int i = 0; i < 256; ++i) {
-						G.Clear(Color.Transparent);
+						int p = -1;
 
-
-						if (B.Width == 40) {
-							G.DrawImage(B, new Rectangle(3, 1, 10, 16), new Rectangle((i >> 5) * 5, (i % 32) * 8, 5, 8), GraphicsUnit.Pixel);
-						} else {
-							G.DrawImage(B, new Rectangle(3, 1, 10, 16), new Rectangle(i * 6, 0, 5, 8), GraphicsUnit.Pixel);
-						}
-
-
-						CharacterImageList.Images.Add((Image)D.Clone());
-
-						ToolStripMenuItem T = new ToolStripMenuItem(GetAsciiName(i), (Image)D.Clone(), ChosenKey);
-						T.Tag = i;
-
-						if (i < AsciiCodes.Length || i == 0x7F) {
-							ToolStripMenuItem T2 = new ToolStripMenuItem(T.Text, T.Image, ChosenKey);
-							T2.Tag = i;
-							ControlChars.Add(T2);
-						}
-						if (i >= 'A' && i <= 'Z') {
-							UpperCaseChars.Add(T);
-						} else if (i >= 'a' && i <= 'z') {
-							LowerCaseChars.Add(T);
-						} else if ((i >= '0' && i <= '9') || (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0x80 && i <= 0x89) || i == 0x0E || i == 0x11 || i == 0x12 || i == 0x1D || i == 0x24 || i == 0xD3 || i == 0xD5))) {
-							NumericChars.Add(T);
-						} else if (KeyValueSet == KeyValueSets.TI83Plus && i >= 0x8A && i <= 0xB8) {
-							AccentedChars.Add(T);
-						} else if (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0xBB && i <= 0xCA && i != 0xC1) || i == 0x5B || i == 0xD9)) {
-							GreekChars.Add(T);
-						} else if (Punctuation.Contains(i)) {
-							PunctuationChars.Add(T);
-						} else if (Mathematical.Contains(i)) {
+						if (k < 0x10) {
+							if (SharpPC1251Keys[k] != null) {
+								nonPrintableToolStripMenuItem.DropDownItems.Add(T);
+							}
+							switch (k) {
+								case 0x05: p = 0x27; break;
+								case 0x0C: p = 0x1D; break;
+								case 0x0D: p = 0x1E; break;
+								case 0x0E: p = 0x1B; break;
+								case 0x0F: p = 0x1C; break;
+							}
+							NonPrintableNames.Add(SharpPC1251Keys[k]);
+						} else if (k >= 0x11 && k <= 0x1F) {
+							switch (k) {
+								case 0x19:
+								case 0x1A:
+									MathematicalChars.Add(T);
+									break;
+								default:
+									PunctuationChars.Add(T);
+									break;
+							}
+							p = (new int[] { 0x20, 0x22, 0x3F, 0x21, 0x23, 0x25, 0x5C, 0x24, 0x19, 0x18, 0x2C, 0x3B, 0x3A, 0x40, 0x26 })[k - 0x11];
+						} else if (k >= 0x30 && k <= 0x39) {
 							MathematicalChars.Add(T);
-						} else if (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0xE0 && i <= 0xE7) || i == 0xF1)) {
-							CursorChars.Add(T);
-						} else if (Arrows.Contains(i)) {
-							ArrowChars.Add(T);
-						} else {
-							OtherChars.Add(T);
+							p = (new int[] { 0x28, 0x29, 0x3E, 0x3C, 0x3D, 0x2B, 0x2D, 0x2A, 0x2F, 0x5E })[k - 0x30];
+						} else if (k >= 0x40 && k <= 0x49) {
+							NumericChars.Add(T);
+							p = k - 0x40 + 0x30;
+						} else if (k >= 0x51 && k <= 0x6A) {
+							UpperCaseChars.Add(T);
+							p = k - 0x51 + 0x41;
+						} else if (k >= 0x4A && k <= 0x4E) {
+							switch (k) {
+								case 0x4B:
+									NumericChars.Add(T);
+									p = 0x05;
+									break;
+								default:
+									PunctuationChars.Add(T);
+									p = (new int[] { 0x2E, 0x05, 0x7F, 0x7E, 0x5F })[k - 0x4A];
+									break;
+							}
+						} else if ((k >= 0x83 && k <= 0x8F) || (k >= 0xA0 && k <= 0xA9) || (k >= 0xB0 && k <= 0xBE)) {
+							DefineChars.Add(T);
+							p = fontIndices[k - 0x70];
+						} else if ((k >= 0xC1 && k <= 0xDA) || (k >= 0xE1 && k <= 0xFA)) {
+							((k < 0xE1) ? DefineChars : ReserveChars).Add(T);
+							p = (k & 0xDF) - 0xC1 + 0x41;
+							switch (p) {
+								case 0x51: p = 0x20; break;
+								case 0x54: p = 0x3D; break;
+							}
+						}
+
+						using (Bitmap D = new Bitmap(16, 16)) {
+
+							ColorPalette P = B.Palette;
+							P.Entries[0] = Color.FromKnownColor(KnownColor.WindowText);
+							B.Palette = P;
+
+
+							Graphics G = Graphics.FromImage(D);
+							G.InterpolationMode = InterpolationMode.NearestNeighbor;
+							G.PixelOffsetMode = PixelOffsetMode.Half;
+
+							if (p >= 0) {
+								G.DrawImage(B, new Rectangle(3, 1, 10, 16), new Rectangle(p * 6, 0, 5, 8), GraphicsUnit.Pixel);
+								T.Image = (Image)D.Clone();
+							}
+
+							CharacterImageList.Images.Add((Image)D.Clone());
+
+						}
+
+						fontIndices[k] = p;
+
+					}
+
+				}
+
+			} else {
+
+				int np = 0;
+				foreach (string s in NonPrintable) {
+					if (s == "-") {
+						nonPrintableToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+					} else {
+						NonPrintableNames.Add(s);
+						ToolStripMenuItem T = new ToolStripMenuItem(string.Format("{0} ({1:X2})", s, np)) {
+							Tag = (np++)
+						};
+						T.Click += new EventHandler(ChosenKey);
+						nonPrintableToolStripMenuItem.DropDownItems.Add(T);
+					}
+				}
+
+				List<int> Punctuation = new List<int>(new int[] { 0x21, 0x22, 0x23, 0x26, 0x27, 0x28, 0x29, 0x2C, 0x2E, 0x2F, 0x3A, 0x3B, 0x3F, 0x40, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x7B, 0x7C, 0x7D, 0x7E, 0xB9, 0xBA, 0xC1 });
+				List<int> Mathematical = new List<int>(new int[] { 0x01, 0x02, 0x03, 0x04, 0x08, 0x09, 0x0D, 0x10, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x25, 0x2A, 0x2B, 0x2C, 0x2D, 0x3C, 0x3D, 0x3E, 0xCB, 0xCC, 0xD2, 0xD4, 0xD7, 0xD8, 0xDA, 0xDB, 0xDD });
+				List<int> Arrows = new List<int>(new int[] { 0x05, 0x06, 0x07, 0x1C, 0x1E, 0x1F, 0xCF, 0xEF, 0xF0 });
+
+				if (KeyValueSet == KeyValueSets.ASCII || KeyValueSet == KeyValueSets.BBCBasic) {
+
+					Punctuation.Add((int)'[');
+					Punctuation.Add((int)'$');
+					Punctuation.RemoveAll(p => p <= 32 || p > 127);
+					Punctuation.Sort();
+
+					Mathematical.RemoveAll(p => p <= 32 || p > 127);
+					Arrows.RemoveAll(p => p <= 32 || p > 127);
+				}
+
+				using (Bitmap B = (KeyValueSet == KeyValueSets.TI83Plus) ? Properties.Resources.TI83PlusMap : Properties.Resources.ASCIIMap) {
+
+					using (Bitmap D = new Bitmap(16, 16)) {
+
+						ColorPalette P = B.Palette;
+						P.Entries[0] = Color.FromKnownColor(KnownColor.WindowText);
+						B.Palette = P;
+
+
+						Graphics G = Graphics.FromImage(D);
+						G.InterpolationMode = InterpolationMode.NearestNeighbor;
+						G.PixelOffsetMode = PixelOffsetMode.Half;
+
+						for (int i = 0; i < 256; ++i) {
+							G.Clear(Color.Transparent);
+
+
+							if (B.Width == 40) {
+								G.DrawImage(B, new Rectangle(3, 1, 10, 16), new Rectangle((i >> 5) * 5, (i % 32) * 8, 5, 8), GraphicsUnit.Pixel);
+							} else {
+								G.DrawImage(B, new Rectangle(3, 1, 10, 16), new Rectangle(i * 6, 0, 5, 8), GraphicsUnit.Pixel);
+							}
+
+
+							CharacterImageList.Images.Add((Image)D.Clone());
+
+							ToolStripMenuItem T = new ToolStripMenuItem(GetAsciiName(i), (Image)D.Clone(), ChosenKey) {
+								Tag = i
+							};
+
+							if (i < AsciiCodes.Length || i == 0x7F) {
+								ToolStripMenuItem T2 = new ToolStripMenuItem(T.Text, T.Image, ChosenKey) {
+									Tag = i
+								};
+								ControlChars.Add(T2);
+							}
+							if (i >= 'A' && i <= 'Z') {
+								UpperCaseChars.Add(T);
+							} else if (i >= 'a' && i <= 'z') {
+								LowerCaseChars.Add(T);
+							} else if ((i >= '0' && i <= '9') || (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0x80 && i <= 0x89) || i == 0x0E || i == 0x11 || i == 0x12 || i == 0x1D || i == 0x24 || i == 0xD3 || i == 0xD5))) {
+								NumericChars.Add(T);
+							} else if (KeyValueSet == KeyValueSets.TI83Plus && i >= 0x8A && i <= 0xB8) {
+								AccentedChars.Add(T);
+							} else if (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0xBB && i <= 0xCA && i != 0xC1) || i == 0x5B || i == 0xD9)) {
+								GreekChars.Add(T);
+							} else if (Punctuation.Contains(i)) {
+								PunctuationChars.Add(T);
+							} else if (Mathematical.Contains(i)) {
+								MathematicalChars.Add(T);
+							} else if (KeyValueSet == KeyValueSets.TI83Plus && ((i >= 0xE0 && i <= 0xE7) || i == 0xF1)) {
+								CursorChars.Add(T);
+							} else if (Arrows.Contains(i)) {
+								ArrowChars.Add(T);
+							} else {
+								OtherChars.Add(T);
+							}
 						}
 					}
 				}
 			}
 
-
-
 			ToolStripMenuItem ToAdd;
 
-			ToAdd = new ToolStripMenuItem("Control");
-			ToAdd.DropDownItems.AddRange(ControlChars.ToArray());
-			KeysContext.Items.Add(ToAdd);
+			if (ControlChars.Count > 0) {
+				ToAdd = new ToolStripMenuItem("Control");
+				ToAdd.DropDownItems.AddRange(ControlChars.ToArray());
+				KeysContext.Items.Add(ToAdd);
+
+			}
 
 			KeysContext.Items.Add(new ToolStripSeparator());
 
@@ -406,7 +539,7 @@ namespace Keyboard_Layout_Editor {
 				KeysContext.Items.Add(ToAdd);
 			}
 
-			if (Arrows.Count > 0) {
+			if (ArrowChars.Count > 0) {
 				ToAdd = new ToolStripMenuItem("Arrows");
 				ToAdd.DropDownItems.AddRange(ArrowChars.ToArray());
 				KeysContext.Items.Add(ToAdd);
@@ -419,11 +552,29 @@ namespace Keyboard_Layout_Editor {
 				for (int i = 0x80, j = 0; j < BbcBasicFunctionKeys.Length; ++i, ++j) {
 					if (i == 0x90) i = 0xC0;
 					if (BbcBasicFunctionKeys[j].Length == 0) continue;
-					ToolStripMenuItem T = new ToolStripMenuItem(GetAsciiName(i), null, ChosenKey);
-					T.Tag = i;
+					ToolStripMenuItem T = new ToolStripMenuItem(GetAsciiName(i), null, ChosenKey) {
+						Tag = i
+					};
 					ToAdd.DropDownItems.Add(T);
 				}
 				KeysContext.Items.Add(ToAdd);
+				if (OtherChars.Count > 0) {
+					KeysContext.Items.Add(new ToolStripSeparator());
+				}
+			}
+
+			if (DefineChars.Count > 0 || ReserveChars.Count > 0) {
+				KeysContext.Items.Add(new ToolStripSeparator());
+				if (DefineChars.Count > 0) {
+					ToAdd = new ToolStripMenuItem("Define");
+					ToAdd.DropDownItems.AddRange(DefineChars.ToArray());
+					KeysContext.Items.Add(ToAdd);
+				}
+				if (ReserveChars.Count > 0) {
+					ToAdd = new ToolStripMenuItem("Reserve");
+					ToAdd.DropDownItems.AddRange(ReserveChars.ToArray());
+					KeysContext.Items.Add(ToAdd);
+				}
 				if (OtherChars.Count > 0) {
 					KeysContext.Items.Add(new ToolStripSeparator());
 				}
@@ -434,6 +585,8 @@ namespace Keyboard_Layout_Editor {
 				ToAdd.DropDownItems.AddRange(OtherChars.ToArray());
 				KeysContext.Items.Add(ToAdd);
 			}
+
+			
 		}
 
 		private void InitialiseLists() {
@@ -972,10 +1125,6 @@ namespace Keyboard_Layout_Editor {
 			};
 		}
 
-		private void exportToolStripMenuItem_Click(object sender, EventArgs e) {
-
-		}
-
 		private string ToBinary(int input, int length) {
 			return ToBinary((uint)input, length);
 		}
@@ -993,8 +1142,9 @@ namespace Keyboard_Layout_Editor {
 		}
 
 		private void AddKey_Click(object sender, EventArgs e) {
-			PhysicalKey K = new PhysicalKey();
-			K.FriendlyName = "<New>";
+			PhysicalKey K = new PhysicalKey {
+				FriendlyName = "<New>"
+			};
 			this.AllKeys.Add(K);
 			this.AllKeys.Sort();
 			this.AllKeysList.Items.Clear();
@@ -1052,11 +1202,11 @@ namespace Keyboard_Layout_Editor {
 			UpdateSelected();
 		}
 
-		private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ExitToolStripMenuItem_Click(object sender, EventArgs e) {
 			this.Close();
 		}
 
-		private void openToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void OpenToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (OpenXmlDialog.ShowDialog() == DialogResult.OK) {
 				try {
 					LoadXml(OpenXmlDialog.FileName);
@@ -1066,7 +1216,7 @@ namespace Keyboard_Layout_Editor {
 			}
 		}
 
-		private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void SaveToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (SaveXmlDialog.ShowDialog() == DialogResult.OK) {
 				try {
 					SaveXml(SaveXmlDialog.FileName);
@@ -1076,7 +1226,7 @@ namespace Keyboard_Layout_Editor {
 			}
 		}
 
-		private void toTI83PlusFileToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ToTI83PlusFileToolStripMenuItem_Click(object sender, EventArgs e) {
 
 			var CompiledData = this.GetExportData();
 
@@ -1220,7 +1370,7 @@ namespace Keyboard_Layout_Editor {
 			}
 		}
 
-		private void toRawBinaryToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ToRawBinaryToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (this.ExportBinaryDialog.ShowDialog(this) == DialogResult.OK) {
 				var data = this.GetExportData();
 				try {
@@ -1231,7 +1381,7 @@ namespace Keyboard_Layout_Editor {
 			}
 		}
 
-		private void toTextToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ToTextToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (this.ExportAssemblyDialog.ShowDialog(this) == DialogResult.OK) {
 				var data = this.GetExportData();
 				try {
@@ -1243,7 +1393,7 @@ namespace Keyboard_Layout_Editor {
 		}
 
 
-		private void toTextCToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ToTextCToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (this.ExportCDialog.ShowDialog(this) == DialogResult.OK) {
 				var data = this.GetExportData();
 				try {
@@ -1254,22 +1404,28 @@ namespace Keyboard_Layout_Editor {
 			}
 		}
 
-		private void tI83PlusToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void TI83PlusToolStripMenuItem_Click(object sender, EventArgs e) {
 			this.KeyValueSet = KeyValueSets.TI83Plus;
 		}
 
-		private void aSCIIToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ASCIIToolStripMenuItem_Click(object sender, EventArgs e) {
 			this.KeyValueSet = KeyValueSets.ASCII;
 		}
 
-		private void bBCBASICToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void BBCBASICToolStripMenuItem_Click(object sender, EventArgs e) {
 			this.KeyValueSet = KeyValueSets.BBCBasic;
 		}
 
-		private void keySetsToolStripMenuItem_DropDownOpening(object sender, EventArgs e) {
-			this.tI83PlusToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.TI83Plus;
-			this.aSCIIToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.ASCII;
-			this.bBCBASICToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.BBCBasic;
+		private void SharpPC1251ToolStripMenuItem_Click(object sender, EventArgs e) {
+			this.KeyValueSet = KeyValueSets.SharpPC1251;
+
+		}
+
+		private void KeySetsToolStripMenuItem_DropDownOpening(object sender, EventArgs e) {
+			this.TI83PlusToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.TI83Plus;
+			this.ASCIIToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.ASCII;
+			this.BBCBASICToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.BBCBasic;
+			this.SharpPC1251ToolStripMenuItem.Checked = this.KeyValueSet == KeyValueSets.SharpPC1251;
 		}
 
 		private void AllKeysList_MouseDown(object sender, MouseEventArgs e) {

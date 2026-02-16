@@ -43,6 +43,7 @@ namespace Keyboard_Layout_Editor {
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.ModifiedByGroup = new System.Windows.Forms.GroupBox();
 			this.ModifierGroup = new System.Windows.Forms.GroupBox();
+			this.SecondaryDeviceCode = new System.Windows.Forms.NumericUpDown();
 			this.DeviceCode = new System.Windows.Forms.NumericUpDown();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -63,14 +64,16 @@ namespace Keyboard_Layout_Editor {
 			this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toRawBinaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toTextCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
 			this.toTI83PlusFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keySetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.tI83PlusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.aSCIIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.bBCBASICToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.TI83PlusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.ASCIIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.BBCBASICToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.SharpPC1251ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
 			this.DescriptionPanel = new System.Windows.Forms.Panel();
 			this.DescriptionText = new System.Windows.Forms.TextBox();
@@ -79,8 +82,6 @@ namespace Keyboard_Layout_Editor {
 			this.SaveXmlDialog = new System.Windows.Forms.SaveFileDialog();
 			this.ExportAssemblyDialog = new System.Windows.Forms.SaveFileDialog();
 			this.ExportBinaryDialog = new System.Windows.Forms.SaveFileDialog();
-			this.SecondaryDeviceCode = new System.Windows.Forms.NumericUpDown();
-			this.toTextCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.ExportCDialog = new System.Windows.Forms.SaveFileDialog();
 			this.KeysContext.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.MainSplit)).BeginInit();
@@ -92,6 +93,7 @@ namespace Keyboard_Layout_Editor {
 			this.groupBox1.SuspendLayout();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.ModifierGroup.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.SecondaryDeviceCode)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.DeviceCode)).BeginInit();
 			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ScanCode)).BeginInit();
@@ -100,7 +102,6 @@ namespace Keyboard_Layout_Editor {
 			this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
 			this.toolStripContainer1.SuspendLayout();
 			this.DescriptionPanel.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.SecondaryDeviceCode)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// AllKeysList
@@ -314,6 +315,20 @@ namespace Keyboard_Layout_Editor {
 			this.ModifierGroup.TabStop = false;
 			this.ModifierGroup.Text = "General";
 			// 
+			// SecondaryDeviceCode
+			// 
+			this.SecondaryDeviceCode.Hexadecimal = true;
+			this.SecondaryDeviceCode.Location = new System.Drawing.Point(152, 68);
+			this.SecondaryDeviceCode.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+			this.SecondaryDeviceCode.Name = "SecondaryDeviceCode";
+			this.SecondaryDeviceCode.Size = new System.Drawing.Size(41, 20);
+			this.SecondaryDeviceCode.TabIndex = 10;
+			this.SecondaryDeviceCode.ValueChanged += new System.EventHandler(this.SecondaryDeviceCode_ValueChanged);
+			// 
 			// DeviceCode
 			// 
 			this.DeviceCode.Hexadecimal = true;
@@ -495,22 +510,22 @@ namespace Keyboard_Layout_Editor {
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
 			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.openToolStripMenuItem.Text = "&Open...";
-			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+			this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
 			// 
 			// saveToolStripMenuItem
 			// 
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
 			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.saveToolStripMenuItem.Text = "&Save...";
-			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+			this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(152, 6);
 			// 
 			// exportToolStripMenuItem
 			// 
@@ -521,23 +536,29 @@ namespace Keyboard_Layout_Editor {
             this.toolStripMenuItem5,
             this.toTI83PlusFileToolStripMenuItem});
 			this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-			this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.exportToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.exportToolStripMenuItem.Text = "&Export";
-			this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
 			// 
 			// toRawBinaryToolStripMenuItem
 			// 
 			this.toRawBinaryToolStripMenuItem.Name = "toRawBinaryToolStripMenuItem";
 			this.toRawBinaryToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
 			this.toRawBinaryToolStripMenuItem.Text = "Binary...";
-			this.toRawBinaryToolStripMenuItem.Click += new System.EventHandler(this.toRawBinaryToolStripMenuItem_Click);
+			this.toRawBinaryToolStripMenuItem.Click += new System.EventHandler(this.ToRawBinaryToolStripMenuItem_Click);
 			// 
 			// toTextToolStripMenuItem
 			// 
 			this.toTextToolStripMenuItem.Name = "toTextToolStripMenuItem";
 			this.toTextToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
 			this.toTextToolStripMenuItem.Text = "Assembly source...";
-			this.toTextToolStripMenuItem.Click += new System.EventHandler(this.toTextToolStripMenuItem_Click);
+			this.toTextToolStripMenuItem.Click += new System.EventHandler(this.ToTextToolStripMenuItem_Click);
+			// 
+			// toTextCToolStripMenuItem
+			// 
+			this.toTextCToolStripMenuItem.Name = "toTextCToolStripMenuItem";
+			this.toTextCToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+			this.toTextCToolStripMenuItem.Text = "C source...";
+			this.toTextCToolStripMenuItem.Click += new System.EventHandler(this.ToTextCToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem5
 			// 
@@ -549,51 +570,59 @@ namespace Keyboard_Layout_Editor {
 			this.toTI83PlusFileToolStripMenuItem.Name = "toTI83PlusFileToolStripMenuItem";
 			this.toTI83PlusFileToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
 			this.toTI83PlusFileToolStripMenuItem.Text = "TI-83 and TI-83 Plus files";
-			this.toTI83PlusFileToolStripMenuItem.Click += new System.EventHandler(this.toTI83PlusFileToolStripMenuItem_Click);
+			this.toTI83PlusFileToolStripMenuItem.Click += new System.EventHandler(this.ToTI83PlusFileToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(152, 6);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
 			// 
 			// keySetsToolStripMenuItem
 			// 
 			this.keySetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tI83PlusToolStripMenuItem,
-            this.aSCIIToolStripMenuItem,
-            this.bBCBASICToolStripMenuItem});
+            this.TI83PlusToolStripMenuItem,
+            this.ASCIIToolStripMenuItem,
+            this.BBCBASICToolStripMenuItem,
+            this.SharpPC1251ToolStripMenuItem});
 			this.keySetsToolStripMenuItem.Name = "keySetsToolStripMenuItem";
 			this.keySetsToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
 			this.keySetsToolStripMenuItem.Text = "&Key Sets";
-			this.keySetsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.keySetsToolStripMenuItem_DropDownOpening);
+			this.keySetsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.KeySetsToolStripMenuItem_DropDownOpening);
 			// 
-			// tI83PlusToolStripMenuItem
+			// TI83PlusToolStripMenuItem
 			// 
-			this.tI83PlusToolStripMenuItem.Name = "tI83PlusToolStripMenuItem";
-			this.tI83PlusToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
-			this.tI83PlusToolStripMenuItem.Text = "&TI-83 Plus";
-			this.tI83PlusToolStripMenuItem.Click += new System.EventHandler(this.tI83PlusToolStripMenuItem_Click);
+			this.TI83PlusToolStripMenuItem.Name = "TI83PlusToolStripMenuItem";
+			this.TI83PlusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.TI83PlusToolStripMenuItem.Text = "&TI-83 Plus";
+			this.TI83PlusToolStripMenuItem.Click += new System.EventHandler(this.TI83PlusToolStripMenuItem_Click);
 			// 
-			// aSCIIToolStripMenuItem
+			// ASCIIToolStripMenuItem
 			// 
-			this.aSCIIToolStripMenuItem.Name = "aSCIIToolStripMenuItem";
-			this.aSCIIToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
-			this.aSCIIToolStripMenuItem.Text = "&ASCII";
-			this.aSCIIToolStripMenuItem.Click += new System.EventHandler(this.aSCIIToolStripMenuItem_Click);
+			this.ASCIIToolStripMenuItem.Name = "ASCIIToolStripMenuItem";
+			this.ASCIIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.ASCIIToolStripMenuItem.Text = "&ASCII";
+			this.ASCIIToolStripMenuItem.Click += new System.EventHandler(this.ASCIIToolStripMenuItem_Click);
 			// 
-			// bBCBASICToolStripMenuItem
+			// BBCBASICToolStripMenuItem
 			// 
-			this.bBCBASICToolStripMenuItem.Name = "bBCBASICToolStripMenuItem";
-			this.bBCBASICToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
-			this.bBCBASICToolStripMenuItem.Text = "&BBC BASIC";
-			this.bBCBASICToolStripMenuItem.Click += new System.EventHandler(this.bBCBASICToolStripMenuItem_Click);
+			this.BBCBASICToolStripMenuItem.Name = "BBCBASICToolStripMenuItem";
+			this.BBCBASICToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.BBCBASICToolStripMenuItem.Text = "&BBC BASIC";
+			this.BBCBASICToolStripMenuItem.Click += new System.EventHandler(this.BBCBASICToolStripMenuItem_Click);
+			// 
+			// SharpPC1251ToolStripMenuItem
+			// 
+			this.SharpPC1251ToolStripMenuItem.Name = "SharpPC1251ToolStripMenuItem";
+			this.SharpPC1251ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.SharpPC1251ToolStripMenuItem.Text = "&Sharp PC-1251";
+			this.SharpPC1251ToolStripMenuItem.Click += new System.EventHandler(this.SharpPC1251ToolStripMenuItem_Click);
 			// 
 			// toolStripContainer1
 			// 
@@ -662,27 +691,6 @@ namespace Keyboard_Layout_Editor {
 			// 
 			this.ExportBinaryDialog.Filter = "Raw binary (*.bin)|*.bin";
 			// 
-			// SecondaryDeviceCode
-			// 
-			this.SecondaryDeviceCode.Hexadecimal = true;
-			this.SecondaryDeviceCode.Location = new System.Drawing.Point(152, 68);
-			this.SecondaryDeviceCode.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-			this.SecondaryDeviceCode.Name = "SecondaryDeviceCode";
-			this.SecondaryDeviceCode.Size = new System.Drawing.Size(41, 20);
-			this.SecondaryDeviceCode.TabIndex = 10;
-			this.SecondaryDeviceCode.ValueChanged += new System.EventHandler(this.SecondaryDeviceCode_ValueChanged);
-			// 
-			// toTextCToolStripMenuItem
-			// 
-			this.toTextCToolStripMenuItem.Name = "toTextCToolStripMenuItem";
-			this.toTextCToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
-			this.toTextCToolStripMenuItem.Text = "C source...";
-			this.toTextCToolStripMenuItem.Click += new System.EventHandler(this.toTextCToolStripMenuItem_Click);
-			// 
 			// ExportCDialog
 			// 
 			this.ExportCDialog.Filter = "C header file (*.h)|*.h|Text files (*.txt)|*.txt";
@@ -709,6 +717,7 @@ namespace Keyboard_Layout_Editor {
 			this.tableLayoutPanel1.ResumeLayout(false);
 			this.ModifierGroup.ResumeLayout(false);
 			this.ModifierGroup.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.SecondaryDeviceCode)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.DeviceCode)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
@@ -722,7 +731,6 @@ namespace Keyboard_Layout_Editor {
 			this.toolStripContainer1.PerformLayout();
 			this.DescriptionPanel.ResumeLayout(false);
 			this.DescriptionPanel.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.SecondaryDeviceCode)).EndInit();
 			this.ResumeLayout(false);
 
         }
@@ -779,14 +787,15 @@ namespace Keyboard_Layout_Editor {
 		private System.Windows.Forms.SaveFileDialog ExportAssemblyDialog;
 		private System.Windows.Forms.SaveFileDialog ExportBinaryDialog;
 		private System.Windows.Forms.ToolStripMenuItem keySetsToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem tI83PlusToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem aSCIIToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem TI83PlusToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem ASCIIToolStripMenuItem;
 		private System.Windows.Forms.NumericUpDown DeviceCode;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ToolStripMenuItem bBCBASICToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem BBCBASICToolStripMenuItem;
 		private System.Windows.Forms.NumericUpDown SecondaryDeviceCode;
 		private System.Windows.Forms.ToolStripMenuItem toTextCToolStripMenuItem;
 		private System.Windows.Forms.SaveFileDialog ExportCDialog;
+		private System.Windows.Forms.ToolStripMenuItem SharpPC1251ToolStripMenuItem;
 	}
 }
 
