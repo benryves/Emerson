@@ -19,6 +19,8 @@ using System.IO;
 namespace Keyboard_Layout_Editor {
 	public partial class MainEditor : Form {
 
+		private string LayoutFileName = null;
+
 		readonly string[] NonPrintable = new string[]{
 			"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","-",
 			"Up","Down","Left","Right","-",
@@ -195,6 +197,7 @@ namespace Keyboard_Layout_Editor {
 			}
 			InitialiseLists();
 			UpdateModifiedByBoxes();
+			this.LayoutFileName = filename;
 		}
 
 		private readonly CheckBox[] ModifiedByBoxes = new CheckBox[8];
@@ -1216,8 +1219,20 @@ namespace Keyboard_Layout_Editor {
 				}
 			}
 		}
-
+		
 		private void SaveToolStripMenuItem_Click(object sender, EventArgs e) {
+			if (LayoutFileName == null) {
+				SaveAsToolStripMenuItem_Click(sender, e);
+			} else {
+				try {
+					SaveXml(LayoutFileName);
+				} catch (Exception ex) {
+					MessageBox.Show(this, "Couldn't save file: " + ex.Message, "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
+
+		private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (SaveXmlDialog.ShowDialog() == DialogResult.OK) {
 				try {
 					SaveXml(SaveXmlDialog.FileName);
