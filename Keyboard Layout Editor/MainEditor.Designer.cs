@@ -514,34 +514,34 @@ namespace Keyboard_Layout_Editor {
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
 			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.openToolStripMenuItem.Text = "&Open...";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem6
 			// 
 			this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-			this.toolStripMenuItem6.Size = new System.Drawing.Size(177, 6);
+			this.toolStripMenuItem6.Size = new System.Drawing.Size(152, 6);
 			// 
 			// saveToolStripMenuItem
 			// 
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
 			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.saveToolStripMenuItem.Text = "&Save";
 			this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.saveAsToolStripMenuItem.Text = "Save &As...";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.SaveAsToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(152, 6);
 			// 
 			// exportToolStripMenuItem
 			// 
@@ -552,7 +552,7 @@ namespace Keyboard_Layout_Editor {
             this.toolStripMenuItem5,
             this.toTI83PlusFileToolStripMenuItem});
 			this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-			this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.exportToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.exportToolStripMenuItem.Text = "&Export";
 			// 
 			// toRawBinaryToolStripMenuItem
@@ -591,12 +591,12 @@ namespace Keyboard_Layout_Editor {
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(177, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(152, 6);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
 			this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
 			// 
@@ -615,28 +615,28 @@ namespace Keyboard_Layout_Editor {
 			// TI83PlusToolStripMenuItem
 			// 
 			this.TI83PlusToolStripMenuItem.Name = "TI83PlusToolStripMenuItem";
-			this.TI83PlusToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+			this.TI83PlusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.TI83PlusToolStripMenuItem.Text = "&TI-83 Plus";
 			this.TI83PlusToolStripMenuItem.Click += new System.EventHandler(this.TI83PlusToolStripMenuItem_Click);
 			// 
 			// ASCIIToolStripMenuItem
 			// 
 			this.ASCIIToolStripMenuItem.Name = "ASCIIToolStripMenuItem";
-			this.ASCIIToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+			this.ASCIIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.ASCIIToolStripMenuItem.Text = "&ASCII";
 			this.ASCIIToolStripMenuItem.Click += new System.EventHandler(this.ASCIIToolStripMenuItem_Click);
 			// 
 			// BBCBASICToolStripMenuItem
 			// 
 			this.BBCBASICToolStripMenuItem.Name = "BBCBASICToolStripMenuItem";
-			this.BBCBASICToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+			this.BBCBASICToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.BBCBASICToolStripMenuItem.Text = "&BBC BASIC";
 			this.BBCBASICToolStripMenuItem.Click += new System.EventHandler(this.BBCBASICToolStripMenuItem_Click);
 			// 
 			// SharpPC1251ToolStripMenuItem
 			// 
 			this.SharpPC1251ToolStripMenuItem.Name = "SharpPC1251ToolStripMenuItem";
-			this.SharpPC1251ToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+			this.SharpPC1251ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.SharpPC1251ToolStripMenuItem.Text = "&Sharp PC-1251";
 			this.SharpPC1251ToolStripMenuItem.Click += new System.EventHandler(this.SharpPC1251ToolStripMenuItem_Click);
 			// 

@@ -77,6 +77,7 @@ namespace Keyboard_Layout_Editor {
 				X.WriteStartElement("keyboard");
 				X.WriteAttributeString("version", "1");
 				X.WriteAttributeString("title", DescriptionText.Text);
+				X.WriteAttributeString("keyset", KeyValueSet.ToString());
 
 				foreach (PhysicalKey PK in AllKeys) {
 					X.WriteStartElement("key");
@@ -127,6 +128,11 @@ namespace Keyboard_Layout_Editor {
 				switch (A.Name) {
 					case "title":
 						DescriptionText.Text = A.Value;
+						break;
+					case "keyset":
+						if (Enum.TryParse(A.Value, out KeyValueSets set)) {
+							this.KeyValueSet = set;
+						}
 						break;
 				}
 			}
