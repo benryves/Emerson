@@ -254,7 +254,8 @@ namespace Keyboard_Layout_Editor {
 				if (this.keyValueSet != value) {
 					this.keyValueSet = value;
 					this.InitialiseKeyValueSelections();
-				}
+					this.AllKeysList_SelectedIndexChanged(null, null);
+		}
 			}
 		}
 
@@ -693,7 +694,7 @@ namespace Keyboard_Layout_Editor {
 						LVI.Text = "(None)";
 						LVI.ImageIndex = -1;
 					} else if (PK.IsNonPrintable[Modification]) {
-						LVI.Text = string.Format("{0} ({1:X2})", NonPrintableNames[PK.Values[Modification]], PK.Values[Modification]);
+						LVI.Text = string.Format("{0} ({1:X2})", Modification >= 0 && Modification < PK.Values.Length &&  PK.Values[Modification] < NonPrintableNames.Count ? NonPrintableNames[PK.Values[Modification]] : "<Invalid>", PK.Values[Modification]);
 						LVI.ImageIndex = -1;
 					}
 					LVI.Tag = Modification;
